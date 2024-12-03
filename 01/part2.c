@@ -2,27 +2,21 @@
 #include <stdlib.h>
 
 int
-main(void) {
-	size_t i,j,k;
+main(void)
+{
 	char buf[4096];
-	int left, right, appears, result;
-	int list[2][1024];	// Left and right lists
-	i = 0;
-	while (fgets(buf, sizeof(buf), stdin)) {
-		sscanf(buf, "%d %d", &left, &right);
-		list[0][i] = left;
-		list[1][i] = right;
-		i++;
+	unsigned i, j, n, count, result;
+	int left[1024], right[1024];
+	for (i=0; fgets(buf, sizeof(buf), stdin); i++) {
+		sscanf(buf, "%d %d", &left[i], &right[i]);
 	}
+	count = i;
 	result = 0;
-	for (j=0; j<i; j++) {
-		appears = 0;
-		for (k=0; k<i; k++) {
-			if (list[0][j] == list[1][k]) {
-				appears++;
-			}
+	for (i=0; i<count; i++) {
+		for (n=0, j=0; j<count; j++) {
+			n += left[i] == right[j];
 		}
-		result += list[0][j] * appears;
+		result += left[i] * n;
 	}
 	printf("%d\n", result);
 	return 0;

@@ -10,9 +10,8 @@ char *
 get_stdin(void)
 {
 	static char *buf;
-	const size_t siz = 20*1024;	// 20 KB should be enough for everyon, right? ^-^
-	buf = malloc(siz);
-	if (!buf) {
+	const size_t siz = 32*1024;	// 32 KB should be enough for everyon, right? ^-^
+	if (!(buf = malloc(siz))) {
 		err(1, 0);
 	}
 	if (read(STDIN_FILENO, buf, siz) >= (ssize_t)siz) {
@@ -25,6 +24,7 @@ char *
 get_regex_error(int code)
 {
 	switch (code) {
+	case 0:            return "Success, not an error";
 	case REG_NOMATCH:  return "The regexec() function failed to match";
 	case REG_BADPAT:   return "invalid regular expression";
 	case REG_ECOLLATE: return "invalid collating element";
@@ -47,29 +47,22 @@ get_regex_error(int code)
 }
 
 int
-main(void) {
+main(void)
+{
 	char *buf;
-	int code;
-	unsigned sum;
+	int code, result;
 	regex_t preg;
 	regmatch_t pmatch[3];
 	buf = get_stdin();
 	if ((code = regcomp(&preg, "mul\\(([0-9]+),([0-9]+)\\)", REG_EXTENDED))) {
 		errx(1, "regcomp %s", get_regex_error(code));
 	}
-	sum = 0;
+	result = 0;
 	while (regexec(&preg, buf, 3, pmatch, 0) == 0) {
-		/* printf("%lld %lld %.*s %d %d\n", */
-		/*        pmatch[0].rm_so, */
-		/*        pmatch[0].rm_eo, */
-		/*        (int)(pmatch[0].rm_eo - pmatch[0].rm_so), */
-		/*        buf + pmatch[0].rm_so, */
-		/*        atoi(buf + pmatch[1].rm_so), */
-		/*        atoi(buf + pmatch[2].rm_so)); */
-		sum += atoi(buf + pmatch[1].rm_so) *
-		       atoi(buf + pmatch[2].rm_so);
+		result += atoi(buf + pmatch[1].rm_so) *
+		          atoi(buf + pmatch[2].rm_so);
 		buf += pmatch[0].rm_eo;
 	}
-	printf("%u\n", sum);
+	printf("%u\n", result);
 	return 0;
 }

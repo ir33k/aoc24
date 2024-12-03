@@ -6,28 +6,24 @@ typedef int levels_t[256];
 int
 next(char **bp)
 {
-	int a;
+	int result = -1;
 	if (**bp == 0) {
-		return -1;
+		return result;
 	}
-	a = atoi(*bp);
-	while (**bp > ' ') (*bp) += 1;
-	(*bp) += 1;
-	return a;
+	result = atoi(*bp);
+	while (**bp  > ' ') (*bp) += 1;	// Skip non white space
+	(*bp) += 1;	// Skip white space
+	return result;
 }
 
 levels_t *
 get_levels(char *bp)
 {
 	static levels_t levels;
-	int i;
-	i = 0;
-	while (1) {
+	unsigned i;
+	for (i=0; ; i++) {
 		levels[i] = next(&bp);
-		if (levels[i] == -1) {
-			break;
-		}
-		i++;
+		if (levels[i] == -1) break;
 	}
 	return &levels;
 }
@@ -35,9 +31,7 @@ get_levels(char *bp)
 int
 is_safe(levels_t *levels)
 {
-	int ignore;
-	int i, a, b;
-	int increase, diff;
+	int ignore, i, a, b, increase, diff;
 	for (ignore = 0; (*levels)[ignore] != -1; ignore++) {
 		i = 0;
 		if (i == ignore) i++;
@@ -63,20 +57,22 @@ is_safe(levels_t *levels)
 		}
 		return 1;
 skip:
+		continue;
 	}
 	return 0;
 }
 
 int
-main(void) {
+main(void)
+{
 	char buf[4096];
-	unsigned safe;
+	unsigned result;
 	levels_t *levels;
-	safe = 0;
+	result = 0;
 	while (fgets(buf, sizeof(buf), stdin)) {
 		levels = get_levels(buf);
-		safe += is_safe(levels);
+		result += is_safe(levels);
 	}
-	printf("%u\n", safe);
+	printf("%u\n", result);
 	return 0;
 }
