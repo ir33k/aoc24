@@ -45,7 +45,15 @@ found:
 				result ++;
 				break;
 			}
-			map[y][x] = dir;	// Remember direction
+			switch (map[y][x]) {
+			case UP:
+			case RIGHT:
+			case DOWN:
+			case LEFT:
+				break;
+			default:
+				map[y][x] = dir;	// Remember direction
+			}
 			switch (dir) {
 			case UP:    y--; break;
 			case RIGHT: x++; break;
