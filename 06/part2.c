@@ -2,42 +2,40 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum {UP=0, RIGHT, DOWN, LEFT, _DIR_COUNT};
+enum {UP, RIGHT, DOWN, LEFT, _COUNT};	// Directions
 
 int
 main(void)
 {
-	int i, dir;
 	unsigned result;
-	char map[256][256];
+	char map[256][256];	// Map with [y][x] coordinates
 	int w,h;	// Map size
-	int x,y;	// Guard current position
-	int gx,gy;	// Guard original position
-	int ox,oy;	// Obstacle position
-	for (i=0; fgets(map[i], sizeof map[i], stdin); i++);
-	h = i;
-	w = strlen(map[0]) - 1;
+	int x,y, dx,dy, dir;	// Guard current and delta position and walking direction
+	int gx,gy, ox,oy;	// Guard original position and obstacle position
+	// Get map with height and width
+	for (h=0; fgets(map[h], sizeof map[0], stdin); h++);
+	w = strlen(map[0]) -1;	// -1 for '\n' character at the end of the line
 	// Find guard starting position.
-	for (y=0; y<h; y++)
-	for (x=0; x<w; x++) {
-		if (map[y][x] == '^') {
+	for (gy=0; gy<h; gy++)
+	for (gx=0; gx<w; gx++) {
+		if (map[gy][gx] == '^') {
 			goto found;
 		}
 	}
-found:
-	gx=x; gy=y;	// Remember guard original position
-	result = 0;
-	// Put new obstacle in each free space
+found:	result = 0;
+	// Put new obstacle in each free space and walk the guard
 	for (oy=0; oy<h; oy++)
 	for (ox=0; ox<w; ox++) {
-		if (map[oy][ox] == '#' || (oy == gy && ox == gx)) {
+		if (map[oy][ox] != '.') {
 			// Can't put new obstacle in already taken place
 			// or at guard position.
 			continue;
 		}
-		// Put obstacle.
-		map[oy][ox] = 'O';
+		map[oy][ox] = '#';	// Put obstacle
 		// Walk the guard.
+		dir = UP;
+		x = gx;
+		y = gy;
 		while (x<w && x>=0 && y<h && y>=0) {
 			if (map[y][x] == dir) {
 				// I was already here walking in the
@@ -45,47 +43,30 @@ found:
 				result ++;
 				break;
 			}
-			switch (map[y][x]) {
-			case UP:
-			case RIGHT:
-			case DOWN:
-			case LEFT:
-				break;
-			default:
+			if (map[y][x] == '.') {
 				map[y][x] = dir;	// Remember direction
 			}
 			switch (dir) {
-			case UP:    y--; break;
-			case RIGHT: x++; break;
-			case DOWN:  y++; break;
-			case LEFT:  x--; break;
+			case UP:    dx= 0; dy=-1; break;
+			case RIGHT: dx=+1; dy= 0; break;
+			case DOWN:  dx= 0; dy=+1; break;
+			case LEFT:  dx=-1; dy= 0; break;
 			}
-			if (map[y][x] == '#' || map[y][x] == 'O') {
-				switch (dir) {
-				case UP:    y++; break;
-				case RIGHT: x--; break;
-				case DOWN:  y--; break;
-				case LEFT:  x++; break;
-				}
-				dir = (dir + 1) % _DIR_COUNT;	// Turn right
+			x+=dx; y+=dy;	// Apply delta position
+			if (map[y][x] == '#') {
+				x-=dx; y-=dy;	// Go back one step
+				dir = (dir+1) % _COUNT;	// Turn right by switching to next direction
 			}
 		}
 		// Restore map
 		for (y=0; y<h; y++)
 		for (x=0; x<w; x++) {
-			switch (map[y][x]) {
-			case UP:
-			case RIGHT:
-			case DOWN:
-			case LEFT:
-			case 'O':
+			if (map[y][x] < _COUNT) {
 				map[y][x] = '.';
-				break;
 			}
 		}
-		// Restore guard original position
-		dir = UP;
-		x=gx; y=gy;
+		map[oy][ox] = '.';
+		map[gy][gx] = '^';
 	}
 	printf("%u\n", result);
 	return 0;
