@@ -1,7 +1,19 @@
 #include <stdio.h>
 #include <string.h>
 
-enum {UP, RIGHT, DOWN, LEFT, _COUNT};	// Directions
+enum {
+	// Directions
+	UP = 0,
+	RIGHT,
+	DOWN,
+	LEFT,
+	_COUNT,
+	// Map elements
+	EMPTY    = '.',
+	OBSTACLE = '#',
+	GUARD    = '^',
+	VISITED  = 'X',
+};
 
 int main(void) {
 	unsigned result;
@@ -13,7 +25,7 @@ int main(void) {
 	w = strlen(map[0]) -1;	// -1 for '\n' character at the end of the line
 	for (y=0; y<h; y++)
 	for (x=0; x<w; x++) {
-		if (map[y][x] == '^') {
+		if (map[y][x] == GUARD) {
 			goto found;	// Found guard starting position
 		}
 	}
@@ -21,8 +33,8 @@ found:	// Walk the guard.
 	result = 0;
 	dir = UP;	// Initial direction is always UP
 	while (x<w && x>=0 && y<h && y>=0) {
-		result += map[y][x] != 'X';
-		map[y][x] = 'X';
+		result += map[y][x] != VISITED;
+		map[y][x] = VISITED;
 		switch (dir) {
 		case UP:    dx= 0; dy=-1; break;
 		case RIGHT: dx=+1; dy= 0; break;
@@ -30,7 +42,7 @@ found:	// Walk the guard.
 		case LEFT:  dx=-1; dy= 0; break;
 		}
 		x+=dx; y+=dy;	// Apply delta position
-		if (map[y][x] == '#') {
+		if (map[y][x] == OBSTACLE) {
 			x-=dx; y-=dy;	// Go back one step
 			dir = (dir+1) % _COUNT;	// Turn right by switching to next direction
 		}
