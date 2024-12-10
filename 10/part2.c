@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 static char *
 stringify(unsigned num, unsigned base, unsigned lpad)
@@ -28,7 +27,6 @@ int main(void) {
 	int w,h;		// Map size
 	int x,y;		// Current position
 	int hx,hy;		// Trailhead coordinates
-	int dx,dy;		// Delta position of next move
 	int max;		// Max number of path permutations
 	int i,j;		// General indexes
 	char *path;		// Current path
@@ -39,8 +37,6 @@ int main(void) {
 	//
 	max = pow(4, 9);
 	result = 0;
-	dx = 0;
-	dy = 0;
 	for (hy=0; hy<h; hy++)
 	for (hx=0; hx<w; hx++) {
 		if (map[hy][hx] != '0') {
@@ -52,17 +48,13 @@ int main(void) {
 			path = stringify(i, 4, 9);
 			for (j=0; path[j]; j++) {
 				switch (path[j]) {
-				case '0': dx= 0; dy=-1; break;
-				case '1': dx=+1; dy= 0; break;
-				case '2': dx= 0; dy= 1; break;
-				case '3': dx=-1; dy= 0; break;
+				case '0': y--; break;
+				case '1': x++; break;
+				case '2': y++; break;
+				case '3': x--; break;
 				}
-				x += dx;
-				y += dy;
 				if (x<0 || x>=w || y<0 || y>=h ||
 				    map[y][x] != j+1+'0') {
-					x -= dx;
-					y -= dy;
 					goto skip;
 				}
 			}
