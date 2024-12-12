@@ -3,24 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define TO_UPPER(c)	(0xDF & c)
+#define TO_LOWER(c)	(0x20 | c)
+#define IS_LOWER(c)	(0x20 & c)
+
 struct point { int x,y; };
 
 static char map[256][256];	// Map with [y][x] coordinates
-static char visited[256][256]={0};
 static int w,h;		// Map size
 
 static int is_border(int plant, int x, int y)
 {
-	return x<0 || x>=w || y<0 || y>=h || map[y][x] != plant;
+	return x<0 || x>=w || y<0 || y>=h || TO_UPPER(map[y][x]) != plant;
 }
 
 int main(void) {
 	int x,y;		// Current position
 	int dx,dy;
-	int plant;
-	unsigned i;
-	unsigned area;
-	unsigned perimeter;
+	unsigned i, plant, area, perimeter;
 	long unsigned result;
 	int border;
 	struct point stack[256];
@@ -38,70 +38,61 @@ int main(void) {
 		i = 0;
 		stack[i].x = x;
 		stack[i].y = y;
-		i++;
-		while (i--) {
+		do {
 			x = stack[i].x;
 			y = stack[i].y;
-			if (visited[y][x]) {
+			if (IS_LOWER(map[y][x])) {
 				continue;
 			}
 			area++;
-			visited[y][x] = 1;
+			map[y][x] = TO_LOWER(plant);	// Mark as visited
 			//
 			dx=x+0; dy=y+1;
 			border = is_border(plant, dx, dy);
-			if (!border && !visited[dy][dx]) {
+			perimeter += border;
+			if (!border && !IS_LOWER(map[dy][dx])) {
 				stack[i].x = dx;
 				stack[i].y = dy;
 				i++;
-			} else {
-				perimeter += border;
 			}
 			//
 			dx=x+0; dy=y-1;
 			border = is_border(plant, dx, dy);
-			if (!border && !visited[dy][dx]) {
+			perimeter += border;
+			if (!border && !IS_LOWER(map[dy][dx])) {
 				stack[i].x = dx;
 				stack[i].y = dy;
 				i++;
-			} else {
-				perimeter += border;
 			}
 			//
 			dx=x+1; dy=y+0;
 			border = is_border(plant, dx, dy);
-			if (!border && !visited[dy][dx]) {
+			perimeter += border;
+			if (!border && !IS_LOWER(map[dy][dx])) {
 				stack[i].x = dx;
 				stack[i].y = dy;
 				i++;
-			} else {
-				perimeter += border;
 			}
 			//
 			dx=x-1; dy=y+0;
 			border = is_border(plant, dx, dy);
-			if (!border && !visited[dy][dx]) {
+			perimeter += border;
+			if (!border && !IS_LOWER(map[dy][dx])) {
 				stack[i].x = dx;
 				stack[i].y = dy;
 				i++;
-			} else {
-				perimeter += border;
 			}
-		}
-		//
+		} while (i--);
 		result += area * perimeter;
 		// Find next plant
 		for (y=0; y<h; y++)
 		for (x=0; x<w; x++) {
-			if (!visited[y][x]) {
+			if (!IS_LOWER(map[y][x])) {
 				goto next;
 			}
 		}
-		// No more plants
-		break;
-	next:
-		// We found next plant
-		continue;
+		break;	// No more plants
+	next:	continue;
 	}
 	printf("%lu\n", result);
 	return 0;
