@@ -10,7 +10,9 @@ struct v2 {
 	int x,y;
 };
 
-static long long unsigned count_tokens(struct v2 a, struct v2 b, struct v2 prize) {
+static long long unsigned
+count_tokens(struct v2 a, struct v2 b, struct v2 prize)
+{
 	long double n, m, px,py;
 	px = prize.x + 10000000000000;
 	py = prize.y + 10000000000000;

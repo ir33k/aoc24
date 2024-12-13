@@ -15,7 +15,9 @@ struct v2 {
 N*a.x + M*b.x = prize.x
 N*a.y + M*b.y = prize.y
 */
-static unsigned count_tokens(struct v2 a, struct v2 b, struct v2 prize) {
+static unsigned
+count_tokens(struct v2 a, struct v2 b, struct v2 prize)
+{
 	unsigned tokens=-1, cost;
 	int n, m, max_n, max_m;
 	max_n = MAX(prize.x/a.x, prize.y/a.y);
