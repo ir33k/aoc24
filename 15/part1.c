@@ -1,44 +1,45 @@
 #include <stdio.h>
-#include <string.h>
 
 enum {
 	EMPTY = '.',
 	ROBOT = '@',
 	WALL  = '#',
 	BOX   = 'O',
-	TOP   = '^',
+	UP    = '^',
 	RIGHT = '>',
 	DOWN  = 'v',
 	LEFT  = '<',
 };
 
 static char map[64][64];	// [y][x]
-static int w,h;			// Map size
+static int w=0,h=0;		// Map size
+
+static void print_map(int robot) {
+	int x,y;
+	for (y=0; y<h; y++)
+	for (x=0; x<w; x++) {
+		putchar(map[y][x] == ROBOT ? robot : map[y][x]);
+	}
+}
 
 static int move(int x, int y, int dx, int dy) {
-	int tmp;
 	if (map[y+dy][x+dx] == BOX) {
 		move(x+dx, y+dy, dx, dy);
 	}
 	if (map[y+dy][x+dx] != EMPTY) {
 		return 0;
 	}
-	tmp = map[y+dy][x+dx];
 	map[y+dy][x+dx] = map[y][x];
-	map[y][x] = tmp;
+	map[y][x] = EMPTY;
 	return 1;
 }
 
 int main(void) {
 	int x=0,y=0, dx,dy, direction;
 	long unsigned result;
-	// Get map
-	for (h=0; fgets(map[h], sizeof map[0], stdin); h++) {
-		if (map[h][0] == '\n') {
-			break;
-		}
-	}
-	w = strlen(map[0]) -1;	// -1 for '\n' character at the end of the line
+	// Load map, set height and width
+	while (fgets(map[h], sizeof map[0], stdin) && map[h][0] != '\n') h++;
+	while (*map[++w]);
 	// Find robot
 	for (y=0; y<h; y++)
 	for (x=0; x<w; x++) {
@@ -50,7 +51,7 @@ found:
 	// Move robot
 	while ((direction = getchar()) != EOF) {
 		switch (direction) {
-		case TOP:   dx= 0; dy=-1; break;
+		case UP:    dx= 0; dy=-1; break;
 		case RIGHT: dx=+1; dy= 0; break;
 		case DOWN:  dx= 0; dy=+1; break;
 		case LEFT:  dx=-1; dy= 0; break;
@@ -61,7 +62,8 @@ found:
 			y+=dy;
 		}
 	}
-	// Calculate boxes' BPS coordinates
+	print_map(ROBOT);
+	// Calculate boxes' GPS coordinates
 	result = 0;
 	for (y=0; y<h; y++)
 	for (x=0; x<w; x++) {
@@ -70,5 +72,5 @@ found:
 		}
 	}
 	printf("%lu\n", result);
-	return 0;
+	return result != 1413675;
 }
