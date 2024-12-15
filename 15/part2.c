@@ -20,21 +20,6 @@ enum {
 static char map[256][256];	// [y][x]
 static int w,h;			// Map size
 
-static void print_map(int direction) {
-	int x,y;
-	for (y=0; y<h; y++) {
-		for (x=0; x<w; x++) {
-			if (direction && map[y][x] == ROBOT) {
-				printf("%c", direction);
-			} else {
-				printf("%c", map[y][x]);
-			}
-		}
-		printf("\n");
-
-	}
-}
-
 static int move_horizontal(int x, int y, int dx) {
 	int tmp;
 	if (map[y][x+dx] == BOX_L ||
@@ -149,30 +134,6 @@ static void move_vertical(int x, int y, int dy) {
 	}
 }
 
-static char getch(void) {
-        char buf = 0;
-        struct termios old = {0};
-        if (tcgetattr(0, &old) < 0) {
-                perror("tcsetattr()");
-	}
-        old.c_lflag &= ~ICANON;
-        old.c_lflag &= ~ECHO;
-        old.c_cc[VMIN] = 1;
-        old.c_cc[VTIME] = 0;
-        if (tcsetattr(0, TCSANOW, &old) < 0) {
-                perror("tcsetattr ICANON");
-	}
-        if (read(0, &buf, 1) < 0) {
-                perror ("read()");
-	}
-        old.c_lflag |= ICANON;
-        old.c_lflag |= ECHO;
-        if (tcsetattr(0, TCSADRAIN, &old) < 0) {
-                perror ("tcsetattr ~ICANON");
-	}
-        return buf;
-}
-
 int main(int argc, char **argv) {
 	char *tile=0;
 	int x,y, dx,dy, direction;
@@ -215,29 +176,14 @@ int main(int argc, char **argv) {
 	}
 found:
 	while ((direction = getc(fp)) != EOF) {
-		/* switch (getch()) { */
-		/* case 27: */
-		/* 	if (getch() == 91) { */
-		/* 		switch (getch()) { */
-		/* 		case 65: direction = UP;    break; */
-		/* 		case 67: direction = RIGHT; break; */
-		/* 		case 66: direction = DOWN;  break; */
-		/* 		case 68: direction = LEFT;  break; */
-		/* 		} */
-		/* 	} */
-		/* 	break; */
-		/* case 10: */
-		/* 	break; */
-		/* } */
 		switch (direction) {
 		case UP:    dx= 0; dy=-1; break;
 		case RIGHT: dx=+1; dy= 0; break;
 		case DOWN:  dx= 0; dy=+1; break;
 		case LEFT:  dx=-1; dy= 0; break;
 		default:
-			continue;	// Ignore other characters like \n
+			continue;
 		}
-		/* printf("\nDirection: %c\n", direction); */
 		switch (direction) {
 		case UP:
 		case DOWN:
@@ -253,7 +199,6 @@ found:
 			}
 			break;
 		}
-		/* print_map(direction); */
 	}
 	result = 0;
 	for (y=0; y<h; y++)
@@ -263,5 +208,5 @@ found:
 		}
 	}
 	printf("%lu\n", result);
-	return 0;
+	return result != 1399772;
 }
