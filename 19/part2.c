@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 
 static const int indexof[] = {
 	['w'] = 0,
@@ -18,7 +17,7 @@ struct node {
 };
 static struct node head;
 
-static long long unsigned visited[64];
+static long unsigned visited[64];
 
 static void rope_push(char *c) {
 	int i;
@@ -58,18 +57,15 @@ static int rope_length(char *c) {
 	return n;
 }
 
-static long long unsigned check(char *buf, int skip) {
-	long long unsigned i, result=0;
+static long unsigned check(char *buf, int skip) {
+	long unsigned i, result=0;
 	if (buf[skip] == 0) {
 		return 1;	// Riched to the end
 	}
-	switch (visited[skip]) {
-	case 0:
-		visited[skip] = 1;
-		break;
-	default:
+	if (visited[skip]) {
 		return visited[skip] - 1;
 	}
+	visited[skip] = 1;
 	i = rope_length(buf + skip);
 	for (; i; i--) {
 		if (!rope_contains(buf + skip, i)) {
@@ -83,17 +79,15 @@ static long long unsigned check(char *buf, int skip) {
 
 int main(void) {
 	char buf[4096];
-	long long unsigned n, result;
+	long unsigned result;
 	while (scanf("%[a-z], ", buf) > 0) {
 		rope_push(buf);
 	}
 	result = 0;
 	while (scanf("%s\n", buf) > 0) {
 		memset(visited, 0, sizeof visited);
-		n = check(buf, 0);
-		printf("%llu %s\n", n, buf);
-		result += n;
+		result += check(buf, 0);
 	}
-	printf("%llu\n", result);
+	printf("%lu\n", result);
 	return result != 996172272010026;
 }
