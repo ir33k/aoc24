@@ -68,13 +68,13 @@ static int check(char *buf, int skip) {
 	}
 	visited[skip] = 1;
 	i = rope_length(buf + skip);
-	while (i) {
+	for (; i; i--) {
 		if (!rope_contains(buf + skip, i)) {
-			if (check(buf, skip + i)) {
-				return 1;
-			}
+			continue;
 		}
-		i--;
+		if (check(buf, skip + i)) {
+			return 1;
+		}
 	}
 	return 0;
 }

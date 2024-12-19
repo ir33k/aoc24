@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #define MOD(a,b) (((a) % (b) + (b)) % (b))
 
 struct robot {
@@ -10,16 +9,24 @@ struct robot {
 static struct robot robots[512];
 static int rcount=0;
 
+// def estimate_noise(I):
+// 
+//   H, W = I.shape
+//   M = [[ 1, -2,  1],
+//        [-2,  4, -2],
+//        [ 1, -2,  1]]
+//   sigma = np.sum(np.sum(np.absolute(convolve2d(I, M))))
+//   sigma = sigma * math.sqrt(0.5 * math.pi) / (6 * (W-2) * (H-2))
+//   return sigma
+static float noise_level(void) {
+}
+
 int main(void) {
 	int usleep(unsigned);
 	int i, w,h, x,y, n;
 	char buf[4096];
 	long unsigned j=0;
-	// NOTE(irek): I added width and height information to input files
-	// on the first line as example and puzzle input have different
-	// width and height which normally had to be hardcoded.
-	fgets(buf, sizeof buf, stdin);
-	sscanf(buf, "w=%d h=%d", &w, &h);
+	scanf("w=%d h=%d\n", &w, &h);	// NOTE(irek): I stored size in input.
 	while (fgets(buf, sizeof buf, stdin)) {
 		sscanf(buf, "p=%d,%d v=%d,%d",
 		       &robots[rcount].px, &robots[rcount].py,
@@ -56,21 +63,7 @@ int main(void) {
 			printf("\n");
 		}
 		printf("\n");
-		usleep(1000000/16);	// 4 FPS
-	// 	for (y=0; y<h; y++) {
-	// 		n=0;
-	// 		for (x=0; x<w; x++) {
-	// 			for (i=0; i<rcount; i++) {
-	// 				n += robots[i].p.x == x && robots[i].p.y == y;
-	// 			}
-	// 		}
-	// 		if (n != y*2+1) {
-	// 			goto skip;
-	// 		}
-	// 	}
-	// 	break;
-	// skip:
-	// 	continue;
+		usleep(1000000/16);	// 16 FPS
 	}
 	printf("%lu\n", j+1);
 	return 0;
