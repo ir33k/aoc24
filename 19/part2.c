@@ -1,27 +1,20 @@
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-static const int indexof[] = {
-	['w'] = 0,
-	['u'] = 1,
-	['b'] = 2,
-	['r'] = 3,
-	['g'] = 4,
-};
-
+// https://en.wikipedia.org/wiki/Rope_(data_structure)
 struct node {
-	struct node *next[5];
+	struct node *next[5];	// We have only 5 indexes (colors)
 	int end;
 };
-static struct node head;
+static struct node rope_head;
 
-static long unsigned visited[64];
+static const int indexof[] = { ['w']=0, ['u']=1, ['b']=2, ['r']=3, ['g']=4 };
+static long unsigned cache[64];
 
 static void rope_push(char *c) {
 	int i;
-	struct node *node = &head;
+	struct node *node = &rope_head;
 	for (; *c; c++) {
 		i = indexof[(int)*c];
 		if (!node->next[i]) {
@@ -33,9 +26,8 @@ static void rope_push(char *c) {
 }
 
 static int rope_contains(char *c, int len) {
-	struct node *node = &head;
+	struct node *node = &rope_head;
 	for (; len && *c; c++, len--) {
-		assert(*c);
 		node = node->next[indexof[(int)*c]];
 		if (!node) {
 			return 0;
@@ -46,35 +38,33 @@ static int rope_contains(char *c, int len) {
 
 static int rope_length(char *c) {
 	int n=0;
-	struct node *node = &head;
-	for (; *c; c++) {
+	struct node *node = &rope_head;
+	for (; *c; c++, n++) {
 		node = node->next[indexof[(int)*c]];
 		if (!node) {
 			break;
 		}
-		n++;
 	}
 	return n;
 }
 
-static long unsigned check(char *buf, int skip) {
-	long unsigned i, result=0;
-	if (buf[skip] == 0) {
+static long unsigned check(char *buf, int n) {
+	long unsigned i;
+	if (buf[n] == 0) {
 		return 1;	// Riched to the end
 	}
-	if (visited[skip]) {
-		return visited[skip] - 1;
+	if (cache[n]) {		// I have already been here
+		return cache[n] - 1;
 	}
-	visited[skip] = 1;
-	i = rope_length(buf + skip);
+	cache[n] = 1;		// Mark visited byte with 1
+	i = rope_length(buf + n);
 	for (; i; i--) {
-		if (!rope_contains(buf + skip, i)) {
+		if (!rope_contains(buf + n, i)) {
 			continue;
 		}
-		result += check(buf, skip + i);
+		cache[n] += check(buf, n + i);
 	}
-	visited[skip] += result;
-	return result;
+	return cache[n] -1;
 }
 
 int main(void) {
@@ -85,7 +75,7 @@ int main(void) {
 	}
 	result = 0;
 	while (scanf("%s\n", buf) > 0) {
-		memset(visited, 0, sizeof visited);
+		memset(cache, 0, sizeof cache);	// Reset cache
 		result += check(buf, 0);
 	}
 	printf("%lu\n", result);
