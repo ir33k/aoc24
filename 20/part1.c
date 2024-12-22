@@ -1,63 +1,32 @@
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
 
-enum {
-	TRACT = '.',
-	START = 'S',
-	END   = 'E',
-	WALL  = '#',
-	CHEAT = 'X',
-	PATH  = 'O',
-};
+#define ABS(a) ((a) < 0 ? -(a) : (a))
+
+enum { TRACT='.', START='S', END='E', WALL='#' };
 
 static char map[256][256];
-static int steps[256][256];
 static int w=0,h=0;
-static int cheat=0;
+static struct { int x,y; } path[16384];	// [step]
+static unsigned ps = 0;			// path size
 
-static int walk(int x, int y, int step) {
-	int n=0, result=INT_MAX;
-	if (x<0 || x>=w-1 || y<0 || y>=h) {
-		return 0;
+static void walk(int x, int y) {
+	if (map[y][x] == WALL) {
+		return;
 	}
-	switch (map[y][x]) {
-	case '\n':  return 0;
-	case END:   return step;
-	case CHEAT:
-		if (cheat) {
-			if (steps[y][x] > step) {
-				cheat = 0;
-				goto again;
-			}
-		}
-		return 0;
-	case WALL:
-		if (cheat) {
-			cheat = 0;
-			map[y][x] = CHEAT;
-			break;
-		}
-		return 0;
-	}
-	if (steps[y][x] < step) {
-		return 0;
-	}
-again:
-	steps[y][x] = step;
-	n = walk(x+1, y, step+1); if (n && n < result) result = n;
-	n = walk(x-1, y, step+1); if (n && n < result) result = n;
-	n = walk(x, y+1, step+1); if (n && n < result) result = n;
-	n = walk(x, y-1, step+1); if (n && n < result) result = n;
-	return result == INT_MAX ? 0 : result;
+	map[y][x] = WALL;	// Mark as visited
+	path[ps].x = x;
+	path[ps].y = y;
+	assert(++ps < (sizeof path / sizeof path[0]));
+	walk(x+1, y);
+	walk(x-1, y);
+	walk(x, y+1);
+	walk(x, y-1);
 }
 
 int main(void) {
-	int x=0,y=0, sx=0,sy=0, limit=0;
-	int i, n, max;
-	int result=0;
+	unsigned i,j, result=0;
+	int x=0,y=0, distance, saved, limit=0;
 	scanf("limit=%d\n", &limit);
 	// Load map, set height and width
 	while (fgets(map[h], sizeof map[0], stdin)) h++;
@@ -65,26 +34,22 @@ int main(void) {
 	// Find start
 	for (y=0; y<h; y++)
 	for (x=0; x<w; x++) {
-		steps[y][x] = INT_MAX;
 		if (map[y][x] == START) {
-			sx=x;
-			sy=y;
+			goto start;
 		}
 	}
-	//
-	cheat = 0;
-	max = walk(sx, sy, 0);
-	assert(max == 9376 || max == 84);
-	for (i=1; i<max*4; i++) {
-		for (y=0; y<h; y++)
-		for (x=0; x<w; x++) {
-			if (map[y][x] == TRACT) {
-				steps[y][x] = INT_MAX;
-			}
+start:	walk(x, y);
+	assert(ps == 9377 || ps == 85);
+	for (i=0; i<ps; i++)	// Index for start of the cheat
+	for (j=i; j<ps; j++) {	// Index for end of the cheat
+		x = ABS(path[i].x - path[j].x);
+		y = ABS(path[i].y - path[j].y);
+		distance = x + y;
+		if (distance > 2) {
+			continue;
 		}
-		cheat = 1;
-		n = walk(sx, sy, 0);
-		result += (max - n >= limit);
+		saved = j-i - distance;
+		result += saved >= limit;
 	}
 	printf("%d\n", result);
 	return !(result == 1452 || result == 44);
