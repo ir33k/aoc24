@@ -18,14 +18,6 @@ static int steps[256][256];
 static int w=0,h=0;
 static int cheat=0;
 
-static void print_map(void) {
-	int x,y;
-	for (y=0; y<h; y++)
-	for (x=0; x<w; x++) {
-		printf("%c", map[y][x]);
-	}
-}
-
 static int walk(int x, int y, int step) {
 	int n=0, result=INT_MAX;
 	if (x<0 || x>=w-1 || y<0 || y>=h) {
