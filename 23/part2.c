@@ -5,8 +5,12 @@
 
 #define MAX 0x191A	// Magic number, my secret
 
-/* "ta"       Computer name.
- * 0x74 0x61  Each character number.
+/* Convert computer name to single number that is used as index to
+ * nodes array and basically for everything.  Working with strings is
+ * not optimal.
+ *
+ * "ta"       Computer name.
+ * 0x74 0x61  Each character number in ASCII.
  * 0x13 0x00  Only a-z are used, subtract 'a' to have range from 0 to 25.
  * 0x1300     Combine bytes together into single integer. 
  */
@@ -21,21 +25,21 @@ static struct node *nodes[MAX]={0};	// [parent_index]
 static void nodes_add(int parent, int child) {
 	struct node *node = nodes[parent];
 	if (!node) {
-		nodes[parent] = malloc(sizeof *node);
+		nodes[parent] = malloc(sizeof *node);	// Let it leak...
 		nodes[parent]->child = child;
 		nodes[parent]->next = 0;
 		return;
 	}
 	if (node->child == child) {
-		return;
+		return;	// Avoid duplicates
 	}
 	while (node->next) {
 		node = node->next;
 		if (node && node->child == child) {
-			return;
+			return;	// Avoid duplicates
 		}
 	}
-	node->next = malloc(sizeof *node);
+	node->next = malloc(sizeof *node); // Memory never bothered me anyway
 	node->next->child = child;
 	node->next->next = 0;
 }
