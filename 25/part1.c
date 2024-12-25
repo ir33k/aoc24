@@ -1,45 +1,31 @@
 #include <stdio.h>
-
-static int locks[512][5];
-static int li=0;
-static int keys[512][5];
-static int ki=0;
+#define SIZE 5	// Key and lock height and width
 
 int main(void) {
-	int i,j,k, is_lock, *array;
+	int locks[512][SIZE]={0}, li=0;
+	int  keys[512][SIZE]={0}, ki=0;
+	int i,j,k, *array, result=0;
 	char buf[8];
-	long unsigned result;
-	while (1) {
+	do {
 		fgets(buf, sizeof buf, stdin);
-		is_lock = buf[0] == '#';
-		array = is_lock ? locks[li] : keys[ki];
-		i = is_lock ? 6 : 5;
-		for (; i; i--) {
+		array = buf[0] == '#' ? locks[li++] : keys[ki++];
+		for (i=0; i<SIZE; i++) {
 			fgets(buf, sizeof buf, stdin);
-			for (j=0; j<5; j++) {
+			for (j=0; j<SIZE; j++) {
 				array[j] += buf[j] == '#';
 			}
 		}
-		if (is_lock) {
-			li++;
-		} else {
-			ki++;
-			fgets(buf, sizeof buf, stdin);
-		}
-		if (!fgets(buf, sizeof buf, stdin)) {
-			break;
-		}
-	}
-	result = 0;
+		fgets(buf, sizeof buf, stdin);
+	} while (fgets(buf, sizeof buf, stdin));
 	for (i=0; i<li; i++)
 	for (j=0; j<ki; j++) {
-		for (k=0; k<5; k++) {
-			if (locks[i][k] + keys[j][k] > 5) {
+		for (k=0; k<SIZE; k++) {
+			if (locks[i][k] + keys[j][k] > SIZE) {
 				break;
 			}
 		}
-		result += k == 5;
+		result += k == SIZE;
 	}
-	printf("%lu\n", result);
+	printf("%d\n", result);
 	return !(result == 3327);
 }
