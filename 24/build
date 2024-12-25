@@ -3,4 +3,5 @@ set -e # Stop on first error
 CC="cc"
 CFLAGS="-Wall -Wextra -Wshadow -Wmissing-declarations -Wswitch-enum -pedantic -std=c99 -O2 -ggdb"
 $CC $CFLAGS -o part1 part1.c -lm
-# $CC $CFLAGS -o part2 part2.c -lm
+$CC $CFLAGS -o part2 part2.c -lm
+$CC $CFLAGS -o part2b part2b.c -lm
