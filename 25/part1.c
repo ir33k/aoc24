@@ -39,37 +39,29 @@ single bitwise AND.
 
 There are other small improvements like 0 terminated array.  With
 "normal" code for this AoC day solution I had to track size for locks
-and keys arrays.  Now I just 0 initialize the list and I know for
-sure that binary representation of locks and keys don't produce 0.
-Another thing is that I'm now using all 8 lines of each lock/key from
-input.  Even tho the last line is empty and it is used as separator.
-By including this line I don't have to react to this separator during
-parsing.  I only have a line counter and then by doing MOD of 8 I know
-in which line of the lock/key I'm in and by dividing by 8 I know in
-which lock/key I'm in.
+and keys arrays.  Now I just 0 initialize the list and I know for sure
+that binary representation of locks and keys don't produce 0.  Another
+thing is that I just read input character by character and I know that
+each lock/key is 43 bytes long.  This includes \n characters but those
+will become 0 so they have no effect on the algorithm.  But having
+this 43 magic number I can divide character index to determinate on
+which lock/key I'm in and calculate MOD of that index to know which
+bite to set.
 
 	"The C Side of the Code is a pathway to many
 	abilities some consider to be unnatural."
 */
-
 #include <stdio.h>
 
 int main(void) {
-	const int H=8;		// Height of lock/key
-	long list[512]={0};	// 0 terminated list of locks and keys
-	int i,j, result=0;
-	char buf[8];
-	for (i=0; fgets(buf, sizeof buf, stdin); i++) {
-		for (j=0; buf[j] != '\n'; j++) {
-			if (buf[j] == '#') {
-				list[i/H] |= 1L << ((i%H)+j*H);
-			}
-		}
-	};
-	for (i=0;   list[i]; i++)
-	for (j=i+1; list[j]; j++) {
-		result += !(list[i] & list[j]);
+	long i,j, list[512]={0}, sum=0;
+	for (i=0; (j = getchar()) > 0; i++) {
+		list[i/43] |= (long)(j=='#') << (i%43);
 	}
-	printf("%d\n", result);
-	return !(result == 3327);
+	for (i=0; list[i]; i++)
+	for (j=i; list[j]; j++) {
+		sum += !(list[i] & list[j]);
+	}
+	printf("%ld\n", sum);
+	return sum != 3327;
 }
