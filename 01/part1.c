@@ -1,28 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int
-compar(const void *a, const void *b)
-{
+static int compar(const void *a, const void *b) {
 	return *(int*)a - *(int*)b;
 }
 
-int
-main(void)
-{
-	unsigned i, count;
-	char buf[4096];
-	int left[1024], right[1024], result;
-	for (i=0; fgets(buf, sizeof(buf), stdin); i++) {
-		sscanf(buf, "%d %d", &left[i], &right[i]);
-	}
-	count = i;
-	qsort(left,  count, sizeof(int), &compar);
-	qsort(right, count, sizeof(int), &compar);
-	result = 0;
-	for (i=0; i<count; i++) {
-		result += abs(left[i] - right[i]);
-	}
+int main(void) {
+	int i, list[2][1024], result=0;
+	for (i=0; scanf("%d %d\n", list[0]+i, list[1]+i) > 0; i++);
+	qsort(list[0], i, sizeof(int), &compar);	// Left
+	qsort(list[1], i, sizeof(int), &compar);	// Right
+	while (i--) result += abs(list[0][i] - list[1][i]);
 	printf("%d\n", result);
-	return 0;
+	return result != 1189304;
 }

@@ -1,23 +1,12 @@
 #include <stdio.h>
-#include <stdlib.h>
 
-int
-main(void)
-{
-	char buf[4096];
-	unsigned i, j, n, count, result;
-	int left[1024], right[1024];
-	for (i=0; fgets(buf, sizeof(buf), stdin); i++) {
-		sscanf(buf, "%d %d", &left[i], &right[i]);
-	}
-	count = i;
-	result = 0;
-	for (i=0; i<count; i++) {
-		for (n=0, j=0; j<count; j++) {
-			n += left[i] == right[j];
-		}
-		result += left[i] * n;
+int main(void) {
+	int i,j, list[2][1024], li=0, result=0;
+	for (li=0; scanf("%d %d\n", list[0]+li, list[1]+li) > 0; li++);
+	for (i=0; i<li; i++)
+	for (j=0; j<li; j++) {
+		result += list[0][i] * (list[0][i] == list[1][j]);
 	}
 	printf("%d\n", result);
-	return 0;
+	return result != 24349736;
 }
