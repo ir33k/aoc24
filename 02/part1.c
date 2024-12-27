@@ -1,43 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int
-next(char **bp)
-{
-	int a;
-	if (**bp == 0) {
-		return -1;
-	}
-	a = atoi(*bp);
-	while (**bp > ' ') (*bp) += 1;
-	(*bp) += 1;
-	return a;
-}
-
-int
-main(void) {
-	char buf[4096], *bp;
-	int a,b, diff, increase;
-	unsigned abs, safe;
-	safe = 0;
-skip:	while ((bp = fgets(buf, sizeof(buf), stdin))) {
-		a = next(&bp);
-		b = next(&bp);
-		increase = a < b;
-		while (1) {
-			diff = a - b;
-			abs = diff < 0 ? -diff : diff;
-			if (a < b != increase || abs < 1 || abs > 3) {
-				goto skip;
-			}
-			a = b;
-			b = next(&bp);
-			if (b == -1) {
+int main(void) {
+	int i, list[8], li, increasing, distance, result=0;
+	char buf[256];
+	while (fgets(buf, sizeof(buf), stdin)) {
+		for (i=0, li=0; buf[i]; li++) {
+			list[li] = atoi(buf+i);
+			while (buf[i++] > ' ' );
+		}
+		increasing = list[0] < list[1];
+		for (i=1; i<li; i++) {
+			distance = list[i-1] - list[i];
+			if (distance < 0) distance = -distance;
+			if ((list[i-1] < list[i]) != increasing ||
+			    distance < 1 || distance > 3) {
 				break;
 			}
-		}
-		safe++;
+		};
+		result += i == li;
 	}
-	printf("%u\n", safe);
-	return 0;
+	printf("%u\n", result);
+	return result != 598;
 }
